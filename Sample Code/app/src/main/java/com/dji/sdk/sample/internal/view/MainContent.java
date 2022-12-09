@@ -350,7 +350,7 @@ public class MainContent extends RelativeLayout {
         Log.d(TAG, "mProduct: " + (mProduct == null ? "null" : "unnull"));
         if (null != mProduct ) {
             if (mProduct.isConnected()) {
-                mBtnOpen.setEnabled(true);
+                // mBtnOpen.setEnabled(true); // 20221209 取消button禁用
                 String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
                 mTextConnectionStatus.setText("Status: " + str + " connected");
                 tryUpdateFirmwareVersionWithListener();
@@ -368,12 +368,12 @@ public class MainContent extends RelativeLayout {
                 if (aircraft.getRemoteController() != null && aircraft.getRemoteController().isConnected()) {
                     mTextConnectionStatus.setText(R.string.connection_only_rc);
                     mTextProduct.setText(R.string.product_information);
-                    mBtnOpen.setEnabled(false);
+                    // mBtnOpen.setEnabled(false); // 20221209 取消button禁用
                     mTextModelAvailable.setText("Firmware version:N/A");
                 }
             }
         } else {
-            mBtnOpen.setEnabled(false);
+            // mBtnOpen.setEnabled(false); // 20221209 取消button禁用
             mTextProduct.setText(R.string.product_information);
             mTextConnectionStatus.setText(R.string.connection_loose);
             mTextModelAvailable.setText("Firmware version:N/A");
