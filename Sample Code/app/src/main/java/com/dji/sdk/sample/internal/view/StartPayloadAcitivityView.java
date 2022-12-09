@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import com.dji.sdk.sample.R;
 import com.dji.sdk.sample.demo.payload.PayloadActivity;
 import com.dji.sdk.sample.demo.payload.PayloadSendGetDataActivity;
+import com.dji.sdk.sample.demo.payload.PayloadSendGetDataPipelineTCPActivity;
 import com.dji.sdk.sample.demo.payload.PayloadWidgetActivity;
 import com.dji.sdk.sample.internal.utils.ToastUtils;
 
@@ -84,9 +85,25 @@ public class StartPayloadAcitivityView extends LinearLayout implements Presentab
                 }
             }
         });
+        Button payloadPipeTCPActivity = new Button(new ContextThemeWrapper(context,
+                R.style.button_style));
+        payloadPipeTCPActivity.setText(R.string.payload_pipeline_tcp);
+        payloadPipeTCPActivity.setBackground(context.getResources().getDrawable(R.drawable.round_btn));
+        payloadPipeTCPActivity.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, PayloadSendGetDataPipelineTCPActivity.class);
+                try {
+                    context.startActivity(intent);
+                } catch (Exception e) {
+                    ToastUtils.showToast(context.getResources().getString(R.string.start_payload_fail));
+                }
+            }
+        });
         this.addView(start);
         this.addView(startSendDataActivity);
         this.addView(payloadWidgetActivity);
+        this.addView(payloadPipeTCPActivity);
     }
 
 }
