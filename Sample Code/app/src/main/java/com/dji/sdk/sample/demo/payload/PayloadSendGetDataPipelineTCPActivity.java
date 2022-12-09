@@ -102,12 +102,17 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
         periodView = (EditText) findViewById(R.id.period_value);
         repeatCheckbox = (CheckBox) findViewById(R.id.repeat_send_checkbox);
         repeatCheckbox.setOnClickListener(this);
+
         initListener();
     }
 
     private void initListener() {
         View sendButton = findViewById(R.id.send_data_button);
         sendButton.setOnClickListener(this);
+        View connectButton = findViewById(R.id.connect_data_button);
+        connectButton.setOnClickListener(this);
+        View disconnectButton = findViewById(R.id.disconnect_data_button);
+        disconnectButton.setOnClickListener(this);
         if (ModuleVerificationUtil.isPayloadAvailable()) {
             payload = DJISampleApplication.getAircraftInstance().getPayload();
 
@@ -232,7 +237,7 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
     }
 
     private void connectPointCloudPipe() {
-        if (pipelines != null) {
+        if (pipelines != null && pipelines.getPipelines().size() != 0) {
             pipelines.connect(POINT_CLOUD_PORT, TransmissionControlType.STABLE,
                     new CommonCallbacks.CompletionCallback<PipelineError>() {
                         @Override
@@ -268,6 +273,30 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
                             }
                         }
                     });
+        } else if (pipelines == null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String error = "pipelines null";
+                    Log.e(TAG, "connect: " + error);
+                    receiveSizeTotal = 0;
+                    receiveTotal.setText(String.valueOf(receiveSizeTotal));
+                    receivedDataView.setText(error);
+                    receivedDataView.invalidate();
+                }
+            });
+        } else {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String error = "pipelines size = 0";
+                    Log.e(TAG, "connect: " + error);
+                    receiveSizeTotal = 0;
+                    receiveTotal.setText(String.valueOf(receiveSizeTotal));
+                    receivedDataView.setText(error);
+                    receivedDataView.invalidate();
+                }
+            });
         }
     }
 
