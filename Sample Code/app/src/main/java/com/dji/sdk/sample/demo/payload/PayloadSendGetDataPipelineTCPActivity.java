@@ -24,7 +24,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import dji.common.util.CommonCallbacks;
 import dji.mop.common.Pipeline;
@@ -113,17 +112,13 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
         connectButton.setOnClickListener(this);
         View disconnectButton = findViewById(R.id.disconnect_data_button);
         disconnectButton.setOnClickListener(this);
+        payloadName = null;
         if (ModuleVerificationUtil.isPayloadAvailable()) {
             payload = DJISampleApplication.getAircraftInstance().getPayload();
-
             /**
              *  Gets the product name defined by the manufacturer of the payload device.
              */
             payloadName = payload.getPayloadProductName();
-            payloadNameView.setText(
-                    "Payload Name:" + (TextUtils.isEmpty(payloadName) ? "N/A" : payloadName));
-            payloadNameView.invalidate();
-
             listenData();
 
             // /**
@@ -149,6 +144,9 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
             //     }
             // });
         }
+        payloadNameView.setText(
+                "Payload Name:" + (TextUtils.isEmpty(payloadName) ? "N/A" : payloadName));
+        payloadNameView.invalidate();
     }
 
     @Override
@@ -230,7 +228,7 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
     }
 
     private void initPipes() {
-        if (pipelines == null) {
+        if (ModuleVerificationUtil.isPayloadAvailable() && null != payload && pipelines == null) {
             pipelines = payload.getPipelines();
             connectPointCloudPipe();
         }
