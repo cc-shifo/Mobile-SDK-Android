@@ -24,6 +24,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import dji.common.util.CommonCallbacks;
 import dji.mop.common.Pipeline;
@@ -38,7 +40,7 @@ import dji.sdk.payload.Payload;
 
 public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
         implements View.OnClickListener {
-    private static final String TAG = "PayloadSendGetData";
+    private static final String TAG = "PayloadTCPData";
     private static final int POINT_CLOUD_PORT = 49153;
     private TextView receivedDataView;
     private TextView payloadNameView;
@@ -55,6 +57,8 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
     private Pipeline pointCloudPipe = null;
     private ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
     private ScheduledFuture<?> scheduledFuture;
+
+    private AtomicBoolean mStop = new AtomicBoolean(false);
     private Runnable repeatRunnable = new Runnable() {
         @Override
         public void run() {
@@ -155,6 +159,7 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
             payload.setCommandDataCallback(null);
             payload.setStreamDataCallback(null);
             disconnectPointCloudPipe();
+            mStop.set(true);
         }
         if (scheduledFuture != null && !scheduledFuture.isCancelled() &&
                 !scheduledFuture.isDone()) {
@@ -235,7 +240,7 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
     }
 
     private void connectPointCloudPipe() {
-        if (pipelines != null && pipelines.getPipelines().size() != 0) {
+        if (pipelines != null/* && pipelines.getPipelines().size() != 0*/) {
             pipelines.connect(POINT_CLOUD_PORT, TransmissionControlType.STABLE,
                     new CommonCallbacks.CompletionCallback<PipelineError>() {
                         @Override
@@ -299,6 +304,7 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
     }
 
     private void disconnectPointCloudPipe() {
+        Log.d(TAG, "disconnectPointCloudPipe: ");
         if (pipelines != null) {
             pipelines.disconnect(POINT_CLOUD_PORT,
                     new CommonCallbacks.CompletionCallback<PipelineError>() {
@@ -312,40 +318,58 @@ public class PayloadSendGetDataPipelineTCPActivity extends AppCompatActivity
                     });
             pointCloudPipe = null;
             pipelines = null;
+            Log.d(TAG, "disconnectPointCloudPipe: true");
         }
     }
 
-    private void writeData(byte[] data) {
+    private void writeData(final byte[] data) {
         // Data to be sent. 1 KB data size is recommended.
-        pointCloudPipe.writeData(data, 0, data.length);
-
+        final int ret = pointCloudPipe.writeData(data, 0, data.length);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String str = "" + ret;
+                Log.e(TAG, str);
+                receiveTotal.setText(str);
+                str = ViewHelper.getString(data);
+                receivedDataView.setText(str);
+                receivedDataView.invalidate();
+                if (ret > 0) {
+                    receiveSizeTotal = ret + receiveSizeTotal;
+                }
+            }
+        });
     }
 
     private void listenData() {
-        receiveScheduledFuture = executorService.scheduleAtFixedRate(receiveRunnable, 100,
-                1000, TimeUnit.MILLISECONDS);
+        // receiveScheduledFuture = executorService.scheduleAtFixedRate(receiveRunnable, 100,
+        //         1000, TimeUnit.MILLISECONDS);
+        receiveScheduledFuture = executorService.schedule(receiveRunnable, 5,TimeUnit.MILLISECONDS);
     }
 
     private void readData() {
-        if (pointCloudPipe != null) {
-            byte[] bytes = new byte[1024];
-            int n = pointCloudPipe.readData(bytes, 0, bytes.length);
-            if (n > 0) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.e(TAG, "receiving data size:" + bytes.length);
-                        String str = ViewHelper.getString(bytes);
-                        receiveSizeTotal = bytes.length + receiveSizeTotal;
-                        receiveTotal.setText(String.valueOf(receiveSizeTotal));
-                        receivedDataView.setText(str);
-                        receivedDataView.invalidate();
-                    }
-                });
-            } else {
-                Log.e(TAG, "receiving data error:" + n);
+        while (!mStop.get()) {
+            if (pointCloudPipe != null) {
+                byte[] bytes = new byte[1024];
+                int n = pointCloudPipe.readData(bytes, 0, bytes.length);
+                if (n > 0) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.e(TAG, "receiving data size:" + bytes.length);
+                            String str = ViewHelper.getString(bytes);
+                            receiveSizeTotal = bytes.length + receiveSizeTotal;
+                            receiveTotal.setText(String.valueOf(receiveSizeTotal));
+                            receivedDataView.setText(str);
+                            receivedDataView.invalidate();
+                        }
+                    });
+                } else {
+                    Log.e(TAG, "receiving data error:" + n);
+                }
             }
         }
+
 
 
     }
