@@ -25,6 +25,15 @@ android {
         }
     }
 
+    signingConfigs {
+        config {
+            keyAlias 'key0'
+            keyPassword '123456'
+            storeFile file('./123456.jks')
+            storePassword '123456'
+        }
+    }
+
     buildTypes {
         release {
             shrinkResources false
@@ -34,6 +43,7 @@ android {
         debug {
             shrinkResources false
             minifyEnabled true
+            signingConfig signingConfigs.config
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
