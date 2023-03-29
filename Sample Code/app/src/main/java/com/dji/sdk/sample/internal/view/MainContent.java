@@ -531,7 +531,7 @@ public class MainContent extends RelativeLayout {
                                                           BaseComponent oldComponent,
                                                           BaseComponent newComponent) {
                                 if (newComponent != null) {
-                                    newComponent.setComponentListener(mDJIComponentListener);
+                                    // newComponent.setComponentListener(mDJIComponentListener);
 
                                     if(componentKey == BaseProduct.ComponentKey.FLIGHT_CONTROLLER)
                                     {
@@ -603,7 +603,7 @@ public class MainContent extends RelativeLayout {
                                                           BaseComponent oldComponent,
                                                           BaseComponent newComponent) {
                                 if (newComponent != null) {
-                                    newComponent.setComponentListener(mDJIComponentListener);
+                                    // newComponent.setComponentListener(mDJIComponentListener);
 
                                     if(componentKey == BaseProduct.ComponentKey.FLIGHT_CONTROLLER)
                                     {
