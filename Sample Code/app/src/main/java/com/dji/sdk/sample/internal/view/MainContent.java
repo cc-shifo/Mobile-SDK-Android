@@ -88,11 +88,11 @@ public class MainContent extends RelativeLayout {
     private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
     private int lastProcess = -1;
     private Handler mHander = new Handler();
-    private BaseComponent.ComponentListener mDJIComponentListener = new BaseComponent.ComponentListener() {
+    private BaseComponent.ComponentListener mDJIPayloadComponentListener = new BaseComponent.ComponentListener() {
 
         @Override
         public void onConnectivityChange(boolean isConnected) {
-            Log.d(TAG, "onComponentConnectivityChanged: " + isConnected);
+            Log.d(TAG, "onComponent ConnectivityChanged: payload = " + isConnected);
             notifyStatusChange();
         }
     };
@@ -531,7 +531,10 @@ public class MainContent extends RelativeLayout {
                                                           BaseComponent oldComponent,
                                                           BaseComponent newComponent) {
                                 if (newComponent != null) {
-                                    // newComponent.setComponentListener(mDJIComponentListener);
+                                    if (componentKey == BaseProduct.ComponentKey.PAYLOAD) {
+                                        newComponent.setComponentListener(
+                                                mDJIPayloadComponentListener);
+                                    }
 
                                     if(componentKey == BaseProduct.ComponentKey.FLIGHT_CONTROLLER)
                                     {
@@ -603,7 +606,10 @@ public class MainContent extends RelativeLayout {
                                                           BaseComponent oldComponent,
                                                           BaseComponent newComponent) {
                                 if (newComponent != null) {
-                                    // newComponent.setComponentListener(mDJIComponentListener);
+                                    if (componentKey == BaseProduct.ComponentKey.PAYLOAD) {
+                                        newComponent.setComponentListener(
+                                                mDJIPayloadComponentListener);
+                                    }
 
                                     if(componentKey == BaseProduct.ComponentKey.FLIGHT_CONTROLLER)
                                     {
